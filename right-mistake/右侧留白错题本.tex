@@ -21,15 +21,21 @@
         \def\TotalRows{23}
         \def\RightMargin{3.5cm}
         \def\NumberColWidth{0.3cm}
-        % ==============================================
+
+        % 线条粗细变量
+        \def\ThickWidth{0.7pt}              % 顶部和底部粗线的宽度
+        \def\NormalWidth{0.5pt}             % 正常实线横线的宽度
+        \def\DottedWidth{0.4pt}             % 虚线（包括左侧竖线和右侧横线）的宽度
+        \def\DottedGap{5pt}                 % 虚线间隔（数字越小点越密）
+        % =============================================="
 
         \pgfmathsetmacro{\RowHeight}{\textheight / \TotalRows}
 
         % 1. 顶部粗边界线
-        \draw[line width=1.2pt] (0, 0) -- (\textwidth, 0);
+        \draw[line width=\ThickWidth] (0, 0) -- (\textwidth, 0);
 
         % 2. 第一行底线
-        \draw[line width=0.5pt] (0, -\RowHeight pt) -- (\textwidth, -\RowHeight pt);
+        \draw[line width=\ThickWidth] (0, -\RowHeight pt) -- (\textwidth, -\RowHeight pt);
 
         % 3. 编号列纵向虚线
         % 点和宽度控制
@@ -37,16 +43,16 @@
 
         % 控制细节
         % off 4pt 中的 4 可以随便改成 2, 3, 5, 6 等等，数字越小点越密
-        \draw[line cap=round, dash pattern=on 0pt off 4pt, line width=0.4pt] (\NumberColWidth, -\RowHeight pt) -- (\NumberColWidth, -\textheight);
+        \draw[line cap=round, dash pattern=on 0pt off \DottedGap, line width=\DottedWidth] (\NumberColWidth, -\RowHeight pt) -- (\NumberColWidth, -\textheight);
 
         % 4. 循环绘制剩余的横线
         \foreach \i in {2,...,\TotalRows}{
             \ifnum\i=\TotalRows
                 % 最后一行底部粗边界线
-                \draw[line width=1.2pt] (0, -\textheight) -- (\textwidth, -\textheight);
+                \draw[line width=\ThickWidth] (0, -\textheight) -- (\textwidth, -\textheight);
             \else
                 % 中间的普通横线
-                \draw[line width=0.5pt] (0, -\i*\RowHeight pt) -- (\textwidth - \RightMargin, -\i*\RowHeight pt);
+                \draw[line width=\NormalWidth] (0, -\i*\RowHeight pt) -- (\textwidth - \RightMargin, -\i*\RowHeight pt);
             \fi
         }
     \end{tikzpicture}%
