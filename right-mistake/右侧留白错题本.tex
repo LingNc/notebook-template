@@ -1,0 +1,62 @@
+\documentclass[a5paper, twoside]{article}
+
+% 使用 geometry 设置页面边距
+% twoside 模式下，inner 是靠近装订线的边距（奇数页在左，偶数页在右），outer 是外侧边距
+\usepackage[inner=9mm, outer=5mm, top=6.6mm, bottom=6.6mm]{geometry}
+\usepackage{tikz}
+
+% 取消默认的页码和页眉页脚
+\pagestyle{empty}
+
+% 定义一页完整的绘制宏
+% 【注意】宏定义每行末尾的 % 非常重要，它可以吃掉换行带来的隐藏空格，防止 hbox 溢出
+\newcommand{\notebookpage}{%
+    \noindent
+    \begin{tikzpicture}
+        % 强制设定边界框为文本区的绝对大小
+        % 这样 LaTeX 会忽略线条向外溢出的那 0.6pt，彻底解决溢出和空白页问题
+        \useasboundingbox (0,0) rectangle (\textwidth, -\textheight);
+
+        % ================= 参数设置区 =================
+        \def\TotalRows{23}
+        \def\RightMargin{3.5cm}
+        \def\NumberColWidth{0.3cm}
+        % ==============================================
+
+        \pgfmathsetmacro{\RowHeight}{\textheight / \TotalRows}
+
+        % 1. 顶部粗边界线
+        \draw[line width=1.2pt] (0, 0) -- (\textwidth, 0);
+
+        % 2. 第一行底线
+        \draw[line width=0.5pt] (0, -\RowHeight pt) -- (\textwidth, -\RowHeight pt);
+
+        % 3. 编号列纵向虚线
+        % 点和宽度控制
+        % \draw[dotted, line width=0.4pt] (\NumberColWidth, -\RowHeight pt) -- (\NumberColWidth, -\textheight);
+
+        % 控制细节
+        % off 4pt 中的 4 可以随便改成 2, 3, 5, 6 等等，数字越小点越密
+        \draw[line cap=round, dash pattern=on 0pt off 4pt, line width=0.4pt] (\NumberColWidth, -\RowHeight pt) -- (\NumberColWidth, -\textheight);
+
+        % 4. 循环绘制剩余的横线
+        \foreach \i in {2,...,\TotalRows}{
+            \ifnum\i=\TotalRows
+                % 最后一行底部粗边界线
+                \draw[line width=1.2pt] (0, -\textheight) -- (\textwidth, -\textheight);
+            \else
+                % 中间的普通横线
+                \draw[line width=0.5pt] (0, -\i*\RowHeight pt) -- (\textwidth - \RightMargin, -\i*\RowHeight pt);
+            \fi
+        }
+    \end{tikzpicture}%
+    \clearpage % 使用 clearpage 换页比 newpage 更加稳妥，能清空浮动体队列
+}
+
+\begin{document}
+
+% 生成正反两页
+\notebookpage% 第一页（奇数页，inner margin 在左侧，左留白用于装订）
+\notebookpage% 第二页（偶数页，inner margin 在右侧，右留白用于装订）
+
+\end{document}
