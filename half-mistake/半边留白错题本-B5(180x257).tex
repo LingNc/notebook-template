@@ -1,0 +1,74 @@
+\documentclass[twoside]{article}
+
+% 使用 geometry 设置页面边距
+% twoside 模式下，inner 是靠近装订线的边距（奇数页在左，偶数页在右），outer 是外侧边距
+\usepackage[paperwidth=180mm,paperheight=257mm,inner=9mm, outer=5mm, top=6.6mm, bottom=6.6mm]{geometry}
+\usepackage{tikz}
+
+% 取消默认的页码和页眉页脚
+\pagestyle{empty}
+
+% 定义一页完整的绘制宏
+% 【注意】宏定义每行末尾的 % 非常重要，它可以吃掉换行带来的隐藏空格，防止 hbox 溢出
+\newcommand{\notebookpage}{%
+    \noindent
+    \begin{tikzpicture}
+        % 强制设定边界框为文本区的绝对大小
+        % 这样 LaTeX 会忽略线条向外溢出的那 0.6pt，彻底解决溢出和空白页问题
+        \useasboundingbox (0,0) rectangle (\textwidth, -\textheight);
+
+        % ================= 参数设置区 =================
+        \def\TotalRows{29}                  % 总行数
+        \def\NumberColWidth{0.3cm}          % 左侧编号列虚线的位置
+
+        % 线条粗细变量
+        \def\ThickWidth{0.7pt}              % 顶部和底部粗线的宽度
+        \def\NormalWidth{0.5pt}             % 正常实线横线的宽度
+        \def\DottedWidth{0.4pt}             % 虚线宽度
+        \def\DottedGap{5pt}                 % 虚线间隔（数字越小点越密）
+
+        % 左右分割比例
+        % 0.5 表示正好在一半的位置分割。
+        % 如果你想让左边多一点，可以改成 0.55 (左占55%) 或 0.6 (左占60%)。
+        \def\SplitRatio{0.53}
+        % ==============================================
+
+        \pgfmathsetmacro{\RowHeight}{\textheight / \TotalRows}
+
+        % 1. 顶部粗边界线
+        \draw[line width=\ThickWidth] (0, 0) -- (\textwidth, 0);
+
+        % 2. 第一行底线
+        \draw[line width=\ThickWidth] (0, -\RowHeight pt) -- (\textwidth, -\RowHeight pt);
+
+        % 3. 编号列纵向虚线
+        % off 4pt 中的 4 可以随便改成 2, 3, 5, 6 等等，数字越小点越密
+        \draw[line cap=round, dash pattern=on 0pt off \DottedGap, line width=\DottedWidth] (\NumberColWidth, -\RowHeight pt) -- (\NumberColWidth, -\textheight);
+
+        % 4. 循环绘制剩余的横线
+        \foreach \i in {2,...,\TotalRows}{
+            \ifnum\i=\TotalRows
+                % 最后一行底部粗边界线
+                \draw[line width=\ThickWidth] (0, -\textheight) -- (\textwidth, -\textheight);
+            \else
+                % 将中间的普通横线拆分为两段：
+
+                % 第一段：左侧实线 (从 0 画到 设定比例的宽度)
+                \draw[line width=\NormalWidth] (0, -\i*\RowHeight pt) -- (\SplitRatio\textwidth, -\i*\RowHeight pt);
+
+                % 第二段：右侧虚线 (从 设定比例的宽度 画到 页面最右侧)
+                % 注意这里的样式与左侧的竖虚线保持了完全一致
+                \draw[line cap=round, dash pattern=on 0pt off \DottedGap, line width=\DottedWidth] (\SplitRatio\textwidth, -\i*\RowHeight pt) -- (\textwidth, -\i*\RowHeight pt);
+            \fi
+        }
+    \end{tikzpicture}%
+    \clearpage % 使用 clearpage 换页比 newpage 更加稳妥，能清空浮动体队列
+}
+
+\begin{document}
+
+% 生成正反两页
+\notebookpage% 第一页（奇数页，inner margin 在左侧，左留白用于装订）
+\notebookpage% 第二页（偶数页，inner margin 在右侧，右留白用于装订）
+
+\end{document}
